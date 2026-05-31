@@ -1,27 +1,32 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 
 // Reune utilidades de procesos y sistema de archivos para Roblox.
 public static class RobloxUtilidadesSistema
 {
-    private static readonly string[] ProcesosRoblox =
+    private static readonly string[] ProcesosRoblox = new string[]
     {
         "RobloxPlayerBeta",
         "RobloxStudioBeta",
         "RobloxCrashHandler"
     };
 
+    // Indica si hay algun proceso conocido de Roblox en ejecucion.
     public static bool HayProcesoRobloxActivo()
     {
         try
         {
-            foreach (string proceso in ProcesosRoblox)
+            int index = 0;
+
+            while (index < ProcesosRoblox.Length)
             {
-                if (Process.GetProcessesByName(proceso).Length > 0)
+                if (Process.GetProcessesByName(ProcesosRoblox[index]).Length > 0)
                 {
                     return true;
                 }
+
+                index++;
             }
 
             return false;
@@ -32,6 +37,7 @@ public static class RobloxUtilidadesSistema
         }
     }
 
+    // Lanza error si Roblox sigue abierto.
     public static void ValidarRobloxCerrado()
     {
         if (HayProcesoRobloxActivo())
@@ -40,11 +46,12 @@ public static class RobloxUtilidadesSistema
         }
     }
 
+    // Borra todo el contenido de una carpeta sin borrar la carpeta base.
     public static void LimpiarContenidoDirectorio(string directoryPath)
     {
         if (!Directory.Exists(directoryPath))
         {
-            throw new DirectoryNotFoundException($"Directory does not exist: {directoryPath}");
+            throw new DirectoryNotFoundException("Directory does not exist: " + directoryPath);
         }
 
         try
@@ -63,15 +70,16 @@ public static class RobloxUtilidadesSistema
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to clean directory content: {directoryPath}", ex);
+            throw new InvalidOperationException("Failed to clean directory content: " + directoryPath, ex);
         }
     }
 
+    // Borra una carpeta completa de forma recursiva.
     public static void EliminarDirectorioCompleto(string directoryPath)
     {
         if (!Directory.Exists(directoryPath))
         {
-            throw new DirectoryNotFoundException($"Directory does not exist: {directoryPath}");
+            throw new DirectoryNotFoundException("Directory does not exist: " + directoryPath);
         }
 
         try
@@ -80,10 +88,11 @@ public static class RobloxUtilidadesSistema
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to delete directory: {directoryPath}", ex);
+            throw new InvalidOperationException("Failed to delete directory: " + directoryPath, ex);
         }
     }
 
+    // Borra un archivo solo si existe.
     public static void EliminarArchivoSiExiste(string filePath)
     {
         try
@@ -95,15 +104,16 @@ public static class RobloxUtilidadesSistema
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to delete file: {filePath}", ex);
+            throw new InvalidOperationException("Failed to delete file: " + filePath, ex);
         }
     }
 
+    // Calcula el tamano total de una carpeta en bytes.
     public static long CalcularTamanoDirectorioEnBytes(string directoryPath)
     {
         if (!Directory.Exists(directoryPath))
         {
-            throw new DirectoryNotFoundException($"Directory does not exist: {directoryPath}");
+            throw new DirectoryNotFoundException("Directory does not exist: " + directoryPath);
         }
 
         try
@@ -120,7 +130,7 @@ public static class RobloxUtilidadesSistema
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException($"Failed to calculate directory size: {directoryPath}", ex);
+            throw new InvalidOperationException("Failed to calculate directory size: " + directoryPath, ex);
         }
     }
 }

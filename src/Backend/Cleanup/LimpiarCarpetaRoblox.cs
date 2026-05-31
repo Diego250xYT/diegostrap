@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 
 // Elimina por completo la carpeta local principal de Roblox.
 public class LimpiarCarpetaRoblox
 {
+    // Ejecuta la limpieza completa de la carpeta local de Roblox.
     public static void Limpiar()
     {
         try

@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 
 // Elimina la carpeta Versions de Roblox.
 public class LimpiarVersionsRoblox
 {
+    // Ejecuta la limpieza de la carpeta Versions de Roblox.
     public static void Limpiar()
     {
         try
