@@ -1,13 +1,13 @@
 ﻿using System;
 
 // Calcula tamano total de la carpeta local de Roblox.
-public class ObtenerTamanoCarpetaRoblox
+public class GetRobloxFolderSize
 {
-    public static long EnBytes()
+    public static long GetBytes()
     {
         try
         {
-            return RobloxUtilidadesSistema.CalcularTamanoDirectorioEnBytes(RobloxRutas.BaseLocal());
+            return RobloxSystemUtilities.CalculateDirectorySizeInBytes(RobloxPaths.GetBaseLocal());
         }
         catch (Exception ex)
         {
@@ -15,11 +15,11 @@ public class ObtenerTamanoCarpetaRoblox
         }
     }
 
-    public static double EnMegabytes()
+    public static double GetMegabytes()
     {
         try
         {
-            return EnBytes() / 1024d / 1024d;
+            return GetBytes() / 1024d / 1024d;
         }
         catch (Exception ex)
         {

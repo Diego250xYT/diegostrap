@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.IO;
 
 // Reune utilidades de procesos y sistema de archivos para Roblox.
-public static class RobloxUtilidadesSistema
+public static class RobloxSystemUtilities
 {
-    private static readonly string[] ProcesosRoblox = new string[]
+    private static readonly string[] RobloxProcesses = new string[]
     {
         "RobloxPlayerBeta",
         "RobloxStudioBeta",
@@ -13,15 +13,15 @@ public static class RobloxUtilidadesSistema
     };
 
     // Indica si hay algun proceso conocido de Roblox en ejecucion.
-    public static bool HayProcesoRobloxActivo()
+    public static bool HasRunningRobloxProcess()
     {
         try
         {
             int index = 0;
 
-            while (index < ProcesosRoblox.Length)
+            while (index < RobloxProcesses.Length)
             {
-                if (Process.GetProcessesByName(ProcesosRoblox[index]).Length > 0)
+                if (Process.GetProcessesByName(RobloxProcesses[index]).Length > 0)
                 {
                     return true;
                 }
@@ -38,16 +38,16 @@ public static class RobloxUtilidadesSistema
     }
 
     // Lanza error si Roblox sigue abierto.
-    public static void ValidarRobloxCerrado()
+    public static void EnsureRobloxClosed()
     {
-        if (HayProcesoRobloxActivo())
+        if (HasRunningRobloxProcess())
         {
             throw new InvalidOperationException("Roblox is running. Close Roblox before this operation.");
         }
     }
 
     // Borra todo el contenido de una carpeta sin borrar la carpeta base.
-    public static void LimpiarContenidoDirectorio(string directoryPath)
+    public static void ClearDirectoryContents(string directoryPath)
     {
         if (!Directory.Exists(directoryPath))
         {
@@ -75,7 +75,7 @@ public static class RobloxUtilidadesSistema
     }
 
     // Borra una carpeta completa de forma recursiva.
-    public static void EliminarDirectorioCompleto(string directoryPath)
+    public static void DeleteDirectoryRecursively(string directoryPath)
     {
         if (!Directory.Exists(directoryPath))
         {
@@ -93,7 +93,7 @@ public static class RobloxUtilidadesSistema
     }
 
     // Borra un archivo solo si existe.
-    public static void EliminarArchivoSiExiste(string filePath)
+    public static void DeleteFileIfExists(string filePath)
     {
         try
         {
@@ -109,7 +109,7 @@ public static class RobloxUtilidadesSistema
     }
 
     // Calcula el tamano total de una carpeta en bytes.
-    public static long CalcularTamanoDirectorioEnBytes(string directoryPath)
+    public static long CalculateDirectorySizeInBytes(string directoryPath)
     {
         if (!Directory.Exists(directoryPath))
         {

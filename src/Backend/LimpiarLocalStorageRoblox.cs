@@ -1,14 +1,14 @@
 ﻿using System;
 
 // Elimina la carpeta LocalStorage de Roblox.
-public class LimpiarLocalStorageRoblox
+public class ClearRobloxLocalStorage
 {
-    public static void Limpiar()
+    public static void Clear()
     {
         try
         {
-            RobloxUtilidadesSistema.ValidarRobloxCerrado();
-            RobloxUtilidadesSistema.EliminarDirectorioCompleto(RobloxRutas.LocalStorage());
+            RobloxSystemUtilities.EnsureRobloxClosed();
+            RobloxSystemUtilities.DeleteDirectoryRecursively(RobloxPaths.GetLocalStorageDirectory());
         }
         catch (Exception ex)
         {

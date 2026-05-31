@@ -4,9 +4,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 
 // Obtiene perfil publico de Roblox usando userId.
-public class ObtenerPerfilPorUserIdRoblox
+public class GetRobloxProfileByUserId
 {
-    public static async Task<RobloxUserProfile> ObtenerAsync(long userId)
+    public static async Task<RobloxUserProfile> GetAsync(long userId)
     {
         if (userId <= 0)
         {
@@ -23,7 +23,7 @@ public class ObtenerPerfilPorUserIdRoblox
             using (JsonDocument doc = JsonDocument.Parse(json))
             {
                 JsonElement root = doc.RootElement;
-                string avatarUrl = await ObtenerAvatarPerfilRoblox.ObtenerUrlAvatarHeadshotAsync(userId).ConfigureAwait(false);
+                string avatarUrl = await GetRobloxAvatarUrl.GetAvatarHeadshotUrlAsync(userId).ConfigureAwait(false);
 
                 return new RobloxUserProfile
                 {

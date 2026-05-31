@@ -2,25 +2,25 @@
 using System.IO;
 
 // Crea respaldo completo de la carpeta local de Roblox.
-public class RespaldarCarpetaRoblox
+public class BackupRobloxFolder
 {
-    public static void Crear(string rutaDestino)
+    public static void CreateBackup(string destinationPath)
     {
-        if (string.IsNullOrWhiteSpace(rutaDestino))
+        if (string.IsNullOrWhiteSpace(destinationPath))
         {
-            throw new ArgumentException("rutaDestino is required.", nameof(rutaDestino));
+            throw new ArgumentException("destinationPath is required.", nameof(destinationPath));
         }
 
         try
         {
-            string origen = RobloxRutas.BaseLocal();
+            string origen = RobloxPaths.GetBaseLocal();
             if (!Directory.Exists(origen))
             {
                 throw new DirectoryNotFoundException($"Roblox directory does not exist: {origen}");
             }
 
-            string destinoCompleto = Path.Combine(rutaDestino, "Roblox_Backup_" + DateTime.Now.ToString("yyyyMMdd_HHmmss"));
-            CopiarDirectorioRecursivo(origen, destinoCompleto);
+            string destinationFullPath = Path.Combine(destinationPath, "Roblox_Backup_" + DateTime.Now.ToString("yyyyMMdd_HHmmss"));
+            CopyDirectoryRecursively(origen, destinationFullPath);
         }
         catch (Exception ex)
         {
@@ -28,20 +28,20 @@ public class RespaldarCarpetaRoblox
         }
     }
 
-    private static void CopiarDirectorioRecursivo(string origen, string destino)
+    private static void CopyDirectoryRecursively(string sourcePath, string destinationPath)
     {
-        Directory.CreateDirectory(destino);
+        Directory.CreateDirectory(destinationPath);
 
-        foreach (string archivo in Directory.GetFiles(origen))
+        foreach (string archivo in Directory.GetFiles(sourcePath))
         {
-            string destinoArchivo = Path.Combine(destino, Path.GetFileName(archivo));
-            File.Copy(archivo, destinoArchivo, true);
+            string destinationFilePath = Path.Combine(destinationPath, Path.GetFileName(archivo));
+            File.Copy(archivo, destinationFilePath, true);
         }
 
-        foreach (string directorio in Directory.GetDirectories(origen))
+        foreach (string directorio in Directory.GetDirectories(sourcePath))
         {
-            string destinoSubdirectorio = Path.Combine(destino, Path.GetFileName(directorio));
-            CopiarDirectorioRecursivo(directorio, destinoSubdirectorio);
+            string destinationDirectoryPath = Path.Combine(destinationPath, Path.GetFileName(directorio));
+            CopyDirectoryRecursively(directorio, destinationDirectoryPath);
         }
     }
 }

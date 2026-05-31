@@ -1,14 +1,14 @@
 ﻿using System;
 
 // Elimina la carpeta de descargas de Roblox.
-public class LimpiarDownloadsRoblox
+public class ClearRobloxDownloads
 {
-    public static void Limpiar()
+    public static void Clear()
     {
         try
         {
-            RobloxUtilidadesSistema.ValidarRobloxCerrado();
-            RobloxUtilidadesSistema.EliminarDirectorioCompleto(RobloxRutas.Downloads());
+            RobloxSystemUtilities.EnsureRobloxClosed();
+            RobloxSystemUtilities.DeleteDirectoryRecursively(RobloxPaths.GetDownloadsDirectory());
         }
         catch (Exception ex)
         {

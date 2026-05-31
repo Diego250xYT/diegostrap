@@ -3,13 +3,13 @@ using System.IO;
 using System.Linq;
 
 // Obtiene la ruta del log mas reciente de Roblox.
-public class ObtenerUltimoLogRoblox
+public class GetLatestRobloxLog
 {
-    public static string RutaUltimoLog()
+    public static string GetPath()
     {
         try
         {
-            string logsPath = RobloxRutas.Logs();
+            string logsPath = RobloxPaths.GetLogsDirectory();
             if (!Directory.Exists(logsPath))
             {
                 throw new DirectoryNotFoundException($"Logs directory does not exist: {logsPath}");

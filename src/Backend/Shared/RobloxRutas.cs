@@ -2,59 +2,59 @@ using System;
 using System.IO;
 
 // Centraliza rutas locales de Roblox en AppData y Temp.
-public static class RobloxRutas
+public static class RobloxPaths
 {
     // Devuelve la carpeta principal de Roblox en LocalAppData.
-    public static string BaseLocal()
+    public static string GetBaseLocal()
     {
         return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Roblox");
     }
 
     // Devuelve la carpeta de logs de Roblox.
-    public static string Logs()
+    public static string GetLogsDirectory()
     {
-        return Path.Combine(BaseLocal(), "logs");
+        return Path.Combine(GetBaseLocal(), "logs");
     }
 
     // Devuelve la carpeta Versions de Roblox.
-    public static string Versions()
+    public static string GetVersionsDirectory()
     {
-        return Path.Combine(BaseLocal(), "Versions");
+        return Path.Combine(GetBaseLocal(), "Versions");
     }
 
     // Devuelve la carpeta LocalStorage de Roblox.
-    public static string LocalStorage()
+    public static string GetLocalStorageDirectory()
     {
-        return Path.Combine(BaseLocal(), "LocalStorage");
+        return Path.Combine(GetBaseLocal(), "LocalStorage");
     }
 
     // Devuelve la carpeta http cache de Roblox.
-    public static string HttpCache()
+    public static string GetHttpCacheDirectory()
     {
-        return Path.Combine(BaseLocal(), "http");
+        return Path.Combine(GetBaseLocal(), "http");
     }
 
     // Devuelve la carpeta Downloads de Roblox.
-    public static string Downloads()
+    public static string GetDownloadsDirectory()
     {
-        return Path.Combine(BaseLocal(), "Downloads");
+        return Path.Combine(GetBaseLocal(), "Downloads");
     }
 
     // Devuelve la carpeta de crashes de Roblox.
-    public static string Crashes()
+    public static string GetCrashesDirectory()
     {
-        return Path.Combine(BaseLocal(), "crashes");
+        return Path.Combine(GetBaseLocal(), "crashes");
     }
 
     // Devuelve la carpeta temporal de Roblox.
-    public static string TempRoblox()
+    public static string GetTempDirectory()
     {
         return Path.Combine(Path.GetTempPath(), "Roblox");
     }
 
     // Devuelve el archivo de configuracion global de Roblox.
-    public static string ConfiguracionGlobal()
+    public static string GetGlobalSettingsFilePath()
     {
-        return Path.Combine(BaseLocal(), "GlobalBasicSettings_13.xml");
+        return Path.Combine(GetBaseLocal(), "GlobalBasicSettings_13.xml");
     }
 }

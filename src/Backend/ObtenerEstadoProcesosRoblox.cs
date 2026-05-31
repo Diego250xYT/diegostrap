@@ -2,13 +2,13 @@
 using System;
 
 // Consulta estado y cantidad de procesos activos de Roblox.
-public class ObtenerEstadoProcesosRoblox
+public class GetRobloxProcessStatus
 {
-    public static bool EstaAbierto()
+    public static bool IsRunning()
     {
         try
         {
-            return RobloxUtilidadesSistema.HayProcesoRobloxActivo();
+            return RobloxSystemUtilities.HasRunningRobloxProcess();
         }
         catch (Exception ex)
         {
@@ -16,7 +16,7 @@ public class ObtenerEstadoProcesosRoblox
         }
     }
 
-    public static int CantidadProcesosJugador()
+    public static int GetPlayerProcessCount()
     {
         try
         {
@@ -28,7 +28,7 @@ public class ObtenerEstadoProcesosRoblox
         }
     }
 
-    public static int CantidadProcesosStudio()
+    public static int GetStudioProcessCount()
     {
         try
         {

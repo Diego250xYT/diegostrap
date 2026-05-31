@@ -1,15 +1,15 @@
 using System;
 
 // Elimina por completo la carpeta local principal de Roblox.
-public class LimpiarCarpetaRoblox
+public class ClearRobloxFolder
 {
     // Ejecuta la limpieza completa de la carpeta local de Roblox.
-    public static void Limpiar()
+    public static void Clear()
     {
         try
         {
-            RobloxUtilidadesSistema.ValidarRobloxCerrado();
-            RobloxUtilidadesSistema.EliminarDirectorioCompleto(RobloxRutas.BaseLocal());
+            RobloxSystemUtilities.EnsureRobloxClosed();
+            RobloxSystemUtilities.DeleteDirectoryRecursively(RobloxPaths.GetBaseLocal());
         }
         catch (Exception ex)
         {

@@ -5,9 +5,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 
 // Resuelve el userId de Roblox a partir de un username.
-public class ObtenerUsuarioIdRoblox
+public class GetRobloxUserId
 {
-    public static async Task<long> DesdeUsernameAsync(string username)
+    public static async Task<long> ResolveUserIdAsync(string username)
     {
         if (string.IsNullOrWhiteSpace(username))
         {

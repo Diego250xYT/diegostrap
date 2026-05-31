@@ -1,14 +1,14 @@
 ﻿using System;
 
 // Elimina la cache HTTP local de Roblox.
-public class LimpiarHttpCacheRoblox
+public class ClearRobloxHttpCache
 {
-    public static void Limpiar()
+    public static void Clear()
     {
         try
         {
-            RobloxUtilidadesSistema.ValidarRobloxCerrado();
-            RobloxUtilidadesSistema.EliminarDirectorioCompleto(RobloxRutas.HttpCache());
+            RobloxSystemUtilities.EnsureRobloxClosed();
+            RobloxSystemUtilities.DeleteDirectoryRecursively(RobloxPaths.GetHttpCacheDirectory());
         }
         catch (Exception ex)
         {

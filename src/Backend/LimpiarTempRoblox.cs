@@ -1,14 +1,14 @@
 ﻿using System;
 
 // Elimina la carpeta temporal de Roblox en el directorio Temp del usuario.
-public class LimpiarTempRoblox
+public class ClearRobloxTemp
 {
-    public static void Limpiar()
+    public static void Clear()
     {
         try
         {
-            RobloxUtilidadesSistema.ValidarRobloxCerrado();
-            RobloxUtilidadesSistema.EliminarDirectorioCompleto(RobloxRutas.TempRoblox());
+            RobloxSystemUtilities.EnsureRobloxClosed();
+            RobloxSystemUtilities.DeleteDirectoryRecursively(RobloxPaths.GetTempDirectory());
         }
         catch (Exception ex)
         {

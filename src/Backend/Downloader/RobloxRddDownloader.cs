@@ -224,6 +224,27 @@ public static class RobloxRddDownloader
         return HostPath + query;
     }
 
+    // Verifica si una version concreta sigue existiendo en la base de Roblox.
+    public static async Task<bool> VersionExistsAsync(string channel, string binaryType, string versionHash, CancellationToken cancellationToken = default(CancellationToken))
+    {
+        string normalizedChannel = NormalizeChannel(channel);
+        string normalizedBinaryType = NormalizeBinaryType(binaryType);
+        string normalizedVersionHash = NormalizeVersionHash(versionHash);
+
+        if (string.IsNullOrWhiteSpace(normalizedVersionHash))
+        {
+            return false;
+        }
+
+        string blobDirectory = NormalizeBlobDirectory(null, normalizedBinaryType);
+        string versionPath = BuildChannelPath(normalizedChannel) + blobDirectory + normalizedVersionHash + "-rbxPkgManifest.txt";
+
+        using (HttpResponseMessage response = await HttpClient.GetAsync(versionPath, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
+        {
+            return response.IsSuccessStatusCode;
+        }
+    }
+
     private enum RddVersionSource
     {
         Latest,

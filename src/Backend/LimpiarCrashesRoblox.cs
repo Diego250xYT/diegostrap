@@ -1,14 +1,14 @@
 ﻿using System;
 
 // Elimina la carpeta de reportes de fallos de Roblox.
-public class LimpiarCrashesRoblox
+public class ClearRobloxCrashes
 {
-    public static void Limpiar()
+    public static void Clear()
     {
         try
         {
-            RobloxUtilidadesSistema.ValidarRobloxCerrado();
-            RobloxUtilidadesSistema.EliminarDirectorioCompleto(RobloxRutas.Crashes());
+            RobloxSystemUtilities.EnsureRobloxClosed();
+            RobloxSystemUtilities.DeleteDirectoryRecursively(RobloxPaths.GetCrashesDirectory());
         }
         catch (Exception ex)
         {

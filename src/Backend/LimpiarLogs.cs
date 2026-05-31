@@ -1,13 +1,13 @@
 ﻿using System;
 
 // Mantiene compatibilidad con el modulo legado de limpieza de logs.
-public class LimpiarLogs
+public class ClearRobloxLogs
 {
-    public static void Limpiar()
+    public static void Clear()
     {
         try
         {
-            VaciarLogsRoblox.Limpiar();
+            EmptyRobloxLogs.Clear();
         }
         catch (Exception ex)
         {

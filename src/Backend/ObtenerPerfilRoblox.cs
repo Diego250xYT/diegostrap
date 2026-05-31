@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 
 // Obtiene perfil publico de Roblox usando username.
-public class ObtenerPerfilRoblox
+public class GetRobloxProfile
 {
-    public static async Task<RobloxUserProfile> DesdeUsernameAsync(string username)
+    public static async Task<RobloxUserProfile> GetByUsernameAsync(string username)
     {
         if (string.IsNullOrWhiteSpace(username))
         {
@@ -13,8 +13,8 @@ public class ObtenerPerfilRoblox
 
         try
         {
-            long userId = await ObtenerUsuarioIdRoblox.DesdeUsernameAsync(username).ConfigureAwait(false);
-            return await ObtenerPerfilPorUserIdRoblox.ObtenerAsync(userId).ConfigureAwait(false);
+            long userId = await GetRobloxUserId.ResolveUserIdAsync(username).ConfigureAwait(false);
+            return await GetRobloxProfileByUserId.GetAsync(userId).ConfigureAwait(false);
         }
         catch (Exception ex)
         {

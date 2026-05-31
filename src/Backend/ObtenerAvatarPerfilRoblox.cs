@@ -4,9 +4,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 
 // Consulta la URL del avatar publico (headshot) de un usuario de Roblox.
-public class ObtenerAvatarPerfilRoblox
+public class GetRobloxAvatarUrl
 {
-    public static async Task<string> ObtenerUrlAvatarHeadshotAsync(long userId)
+    public static async Task<string> GetAvatarHeadshotUrlAsync(long userId)
     {
         if (userId <= 0)
         {

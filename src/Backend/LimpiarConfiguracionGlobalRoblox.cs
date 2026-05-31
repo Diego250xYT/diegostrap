@@ -1,14 +1,14 @@
 ﻿using System;
 
 // Elimina el archivo de configuracion global de Roblox si existe.
-public class LimpiarConfiguracionGlobalRoblox
+public class ClearRobloxGlobalConfiguration
 {
-    public static void Limpiar()
+    public static void Clear()
     {
         try
         {
-            RobloxUtilidadesSistema.ValidarRobloxCerrado();
-            RobloxUtilidadesSistema.EliminarArchivoSiExiste(RobloxRutas.ConfiguracionGlobal());
+            RobloxSystemUtilities.EnsureRobloxClosed();
+            RobloxSystemUtilities.DeleteFileIfExists(RobloxPaths.GetGlobalSettingsFilePath());
         }
         catch (Exception ex)
         {

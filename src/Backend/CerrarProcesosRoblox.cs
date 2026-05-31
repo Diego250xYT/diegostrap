@@ -2,16 +2,16 @@
 using System;
 
 // Cierra procesos de Roblox Player, Studio y CrashHandler.
-public class CerrarProcesosRoblox
+public class CloseRobloxProcesses
 {
-    public static int CerrarTodos()
+    public static int CloseAll()
     {
         try
         {
             int cerrados = 0;
-            cerrados += Cerrar("RobloxPlayerBeta");
-            cerrados += Cerrar("RobloxStudioBeta");
-            cerrados += Cerrar("RobloxCrashHandler");
+            cerrados += Close("RobloxPlayerBeta");
+            cerrados += Close("RobloxStudioBeta");
+            cerrados += Close("RobloxCrashHandler");
             return cerrados;
         }
         catch (Exception ex)
@@ -20,7 +20,7 @@ public class CerrarProcesosRoblox
         }
     }
 
-    private static int Cerrar(string processName)
+    private static int Close(string processName)
     {
         int count = 0;
         foreach (Process process in Process.GetProcessesByName(processName))

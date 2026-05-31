@@ -1,15 +1,15 @@
 using System;
 
 // Elimina la carpeta Versions de Roblox.
-public class LimpiarVersionsRoblox
+public class ClearRobloxVersions
 {
     // Ejecuta la limpieza de la carpeta Versions de Roblox.
-    public static void Limpiar()
+    public static void Clear()
     {
         try
         {
-            RobloxUtilidadesSistema.ValidarRobloxCerrado();
-            RobloxUtilidadesSistema.EliminarDirectorioCompleto(RobloxRutas.Versions());
+            RobloxSystemUtilities.EnsureRobloxClosed();
+            RobloxSystemUtilities.DeleteDirectoryRecursively(RobloxPaths.GetVersionsDirectory());
         }
         catch (Exception ex)
         {

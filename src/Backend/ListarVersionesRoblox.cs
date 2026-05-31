@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 
 // Lista las versiones instaladas de Roblox dentro de la carpeta Versions.
-public class ListarVersionesRoblox
+public class ListRobloxVersions
 {
-    public static IReadOnlyList<string> ObtenerTodas()
+    public static IReadOnlyList<string> GetAll()
     {
         try
         {
-            string versionsPath = RobloxRutas.Versions();
+            string versionsPath = RobloxPaths.GetVersionsDirectory();
             if (!Directory.Exists(versionsPath))
             {
                 throw new DirectoryNotFoundException($"Versions directory does not exist: {versionsPath}");
