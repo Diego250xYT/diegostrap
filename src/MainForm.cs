@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -8,6 +12,10 @@ namespace DiegoStrap
 {
     internal sealed class MainForm : Form
     {
+        private readonly string[] startupArgs;
+        private readonly TabControl mainTabs;
+        private readonly TabPage downloadTab;
+        private readonly TabPage accountsTab;
         private readonly GroupBox versionModeGroupBox;
         private readonly RadioButton versionSourceRadioButton;
         private readonly RadioButton versionHashRadioButton;
@@ -21,21 +29,52 @@ namespace DiegoStrap
         private readonly ProgressBar progressBar;
         private readonly Label statusLabel;
         private readonly TextBox outputTextBox;
+        private readonly ListBox accountsListBox;
+        private readonly TextBox accountUserTextBox;
+        private readonly TextBox accountPasswordTextBox;
+        private readonly Button addAccountButton;
+        private readonly Button removeAccountButton;
+        private readonly Label accountsNoteLabel;
+        private readonly Button launchInstanceButton;
+        private readonly Button multiInstanceButton;
+        private readonly Label multiInstancePathLabel;
+        private readonly GroupBox protocolGroupBox;
+        private readonly Label protocolStatusLabel;
+        private readonly Button registerProtocolButton;
+        private readonly Button restoreOfficialButton;
+        private readonly Button unregisterProtocolButton;
+        private readonly Button verifyProtocolButton;
 
-        public MainForm()
+        private readonly ProtocolHandlerRegistrar protocolRegistrar;
+
+        private readonly List<string> accountUsernames;
+
+        public MainForm(string[] args)
         {
+            startupArgs = args ?? Array.Empty<string>();
             Text = "DiegoStrap";
             StartPosition = FormStartPosition.CenterScreen;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = true;
-            ClientSize = new Size(560, 395);
+            ClientSize = new Size(580, 430);
             Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+
+            accountUsernames = AccountStore.LoadUsernames();
+            protocolRegistrar = new ProtocolHandlerRegistrar(Application.ExecutablePath);
+
+            mainTabs = new TabControl
+            {
+                Dock = DockStyle.Fill
+            };
+
+            downloadTab = new TabPage("Download");
+            accountsTab = new TabPage("Accounts");
 
             versionModeGroupBox = new GroupBox
             {
                 Text = "Version selection",
-                Location = new Point(16, 12),
+                Location = new Point(10, 12),
                 Size = new Size(528, 110)
             };
 
@@ -97,13 +136,13 @@ namespace DiegoStrap
             {
                 Text = "Binary type",
                 AutoSize = true,
-                Location = new Point(16, 138)
+                Location = new Point(10, 138)
             };
 
             binaryTypeComboBox = new ComboBox
             {
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Location = new Point(140, 134),
+                Location = new Point(134, 134),
                 Width = 140
             };
             binaryTypeComboBox.Items.AddRange(new object[] { "WindowsPlayer", "WindowsStudio64" });
@@ -112,7 +151,7 @@ namespace DiegoStrap
             cleanLogsButton = new Button
             {
                 Text = "Delete Logs",
-                Location = new Point(16, 176),
+                Location = new Point(10, 176),
                 Size = new Size(100, 30)
             };
             cleanLogsButton.Click += CleanLogsButton_Click;
@@ -120,7 +159,7 @@ namespace DiegoStrap
             cleanLocalStorageButton = new Button
             {
                 Text = "Delete LocalStorage",
-                Location = new Point(128, 176),
+                Location = new Point(122, 176),
                 Size = new Size(140, 30)
             };
             cleanLocalStorageButton.Click += CleanLocalStorageButton_Click;
@@ -128,7 +167,7 @@ namespace DiegoStrap
             cleanRobloxFolderButton = new Button
             {
                 Text = "Delete Roblox",
-                Location = new Point(280, 176),
+                Location = new Point(274, 176),
                 Size = new Size(110, 30)
             };
             cleanRobloxFolderButton.Click += CleanRobloxFolderButton_Click;
@@ -138,14 +177,14 @@ namespace DiegoStrap
                 Text = "Download",
                 Width = 100,
                 Height = 32,
-                Location = new Point(16, 222)
+                Location = new Point(10, 222)
             };
             downloadButton.Click += DownloadButton_Click;
 
             progressBar = new ProgressBar
             {
                 Location = new Point(16, 280),
-                Size = new Size(484, 20),
+                Size = new Size(520, 20),
                 Minimum = 0,
                 Maximum = 100
             };
@@ -154,29 +193,192 @@ namespace DiegoStrap
             {
                 Text = "Ready.",
                 AutoSize = false,
-                Location = new Point(16, 308),
-                Size = new Size(484, 20)
+                Location = new Point(10, 308),
+                Size = new Size(520, 20)
             };
 
             outputTextBox = new TextBox
             {
-                Location = new Point(16, 314),
-                Size = new Size(484, 20),
+                Location = new Point(10, 332),
+                Size = new Size(520, 20),
                 ReadOnly = true
             };
 
-            Controls.Add(versionModeGroupBox);
-            Controls.Add(binaryTypeLabel);
-            Controls.Add(binaryTypeComboBox);
-            Controls.Add(cleanLogsButton);
-            Controls.Add(cleanLocalStorageButton);
-            Controls.Add(cleanRobloxFolderButton);
-            Controls.Add(downloadButton);
-            Controls.Add(progressBar);
-            Controls.Add(statusLabel);
-            Controls.Add(outputTextBox);
+            downloadTab.Controls.Add(versionModeGroupBox);
+            downloadTab.Controls.Add(binaryTypeLabel);
+            downloadTab.Controls.Add(binaryTypeComboBox);
+            downloadTab.Controls.Add(cleanLogsButton);
+            downloadTab.Controls.Add(cleanLocalStorageButton);
+            downloadTab.Controls.Add(cleanRobloxFolderButton);
+            downloadTab.Controls.Add(downloadButton);
+            downloadTab.Controls.Add(progressBar);
+            downloadTab.Controls.Add(statusLabel);
+            downloadTab.Controls.Add(outputTextBox);
 
+            accountsListBox = new ListBox
+            {
+                Location = new Point(12, 18),
+                Size = new Size(270, 260)
+            };
+
+            Label accountUserLabel = new Label
+            {
+                Text = "User",
+                AutoSize = true,
+                Location = new Point(300, 18)
+            };
+
+            accountUserTextBox = new TextBox
+            {
+                Location = new Point(300, 38),
+                Size = new Size(240, 23)
+            };
+
+            Label accountPasswordLabel = new Label
+            {
+                Text = "Password",
+                AutoSize = true,
+                Location = new Point(300, 76)
+            };
+
+            accountPasswordTextBox = new TextBox
+            {
+                Location = new Point(300, 96),
+                Size = new Size(240, 23),
+                UseSystemPasswordChar = true
+            };
+
+            addAccountButton = new Button
+            {
+                Text = "Add account",
+                Location = new Point(300, 134),
+                Size = new Size(110, 30)
+            };
+            addAccountButton.Click += AddAccountButton_Click;
+
+            removeAccountButton = new Button
+            {
+                Text = "Remove",
+                Location = new Point(430, 134),
+                Size = new Size(110, 30)
+            };
+            removeAccountButton.Click += RemoveAccountButton_Click;
+
+            launchInstanceButton = new Button
+            {
+                Text = "Launch Roblox",
+                Location = new Point(300, 176),
+                Size = new Size(240, 32)
+            };
+            launchInstanceButton.Click += LaunchInstanceButton_Click;
+
+            multiInstanceButton = new Button
+            {
+                Text = "Enable multi-instance",
+                Location = new Point(300, 216),
+                Size = new Size(240, 32)
+            };
+            multiInstanceButton.Click += MultiInstanceButton_Click;
+
+            multiInstancePathLabel = new Label
+            {
+                Text = BuildRobloxPathLabel(),
+                AutoSize = false,
+                Location = new Point(300, 252),
+                Size = new Size(240, 24)
+            };
+
+            accountsNoteLabel = new Label
+            {
+                Text = "Password is used only for this session and is not saved.",
+                AutoSize = false,
+                Location = new Point(300, 280),
+                Size = new Size(240, 18)
+            };
+
+            protocolGroupBox = new GroupBox
+            {
+                Text = "Protocol handlers",
+                Location = new Point(12, 298),
+                Size = new Size(528, 130)
+            };
+
+            protocolStatusLabel = new Label
+            {
+                Text = protocolRegistrar.GetStatus(),
+                AutoSize = false,
+                Location = new Point(14, 24),
+                Size = new Size(500, 20)
+            };
+
+            registerProtocolButton = new Button
+            {
+                Text = "Register this launcher",
+                Location = new Point(14, 54),
+                Size = new Size(130, 30)
+            };
+            registerProtocolButton.Click += RegisterProtocolButton_Click;
+
+            restoreOfficialButton = new Button
+            {
+                Text = "Restore official Roblox",
+                Location = new Point(152, 54),
+                Size = new Size(130, 30)
+            };
+            restoreOfficialButton.Click += RestoreOfficialButton_Click;
+
+            unregisterProtocolButton = new Button
+            {
+                Text = "Remove handler",
+                Location = new Point(290, 54),
+                Size = new Size(110, 30)
+            };
+            unregisterProtocolButton.Click += UnregisterProtocolButton_Click;
+
+            verifyProtocolButton = new Button
+            {
+                Text = "Verify state",
+                Location = new Point(408, 54),
+                Size = new Size(100, 30)
+            };
+            verifyProtocolButton.Click += VerifyProtocolButton_Click;
+
+            protocolGroupBox.Controls.Add(protocolStatusLabel);
+            protocolGroupBox.Controls.Add(registerProtocolButton);
+            protocolGroupBox.Controls.Add(restoreOfficialButton);
+            protocolGroupBox.Controls.Add(unregisterProtocolButton);
+            protocolGroupBox.Controls.Add(verifyProtocolButton);
+
+            accountsTab.Controls.Add(accountsListBox);
+            accountsTab.Controls.Add(accountUserLabel);
+            accountsTab.Controls.Add(accountUserTextBox);
+            accountsTab.Controls.Add(accountPasswordLabel);
+            accountsTab.Controls.Add(accountPasswordTextBox);
+            accountsTab.Controls.Add(addAccountButton);
+            accountsTab.Controls.Add(removeAccountButton);
+            accountsTab.Controls.Add(launchInstanceButton);
+            accountsTab.Controls.Add(multiInstanceButton);
+            accountsTab.Controls.Add(multiInstancePathLabel);
+            accountsTab.Controls.Add(accountsNoteLabel);
+            accountsTab.Controls.Add(protocolGroupBox);
+
+            mainTabs.TabPages.Add(downloadTab);
+            mainTabs.TabPages.Add(accountsTab);
+            Controls.Add(mainTabs);
+
+            Shown += MainForm_Shown;
             UpdateVersionModeControls();
+            RefreshAccountsList();
+            RefreshProtocolStatus();
+        }
+
+        private void MainForm_Shown(object? sender, EventArgs e)
+        {
+            if (TryGetStartupProtocolUri(out string protocolUri))
+            {
+                HandleProtocolLaunch(protocolUri);
+                BeginInvoke(new Action(Close));
+            }
         }
 
         private async void DownloadButton_Click(object? sender, EventArgs e)
@@ -263,6 +465,177 @@ namespace DiegoStrap
             }
         }
 
+        private void AddAccountButton_Click(object? sender, EventArgs e)
+        {
+            string user = (accountUserTextBox.Text ?? string.Empty).Trim();
+            string password = accountPasswordTextBox.Text ?? string.Empty;
+
+            if (user.Length == 0)
+            {
+                MessageBox.Show(this, "Enter a user name.", "DiegoStrap", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (password.Length == 0)
+            {
+                MessageBox.Show(this, "Enter a password for this session.", "DiegoStrap", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (!HasUserName(user))
+            {
+                accountUsernames.Add(user);
+                AccountStore.SaveUsernames(accountUsernames);
+                RefreshAccountsList();
+            }
+
+            accountPasswordTextBox.Clear();
+            accountsListBox.SelectedItem = user;
+        }
+
+        private void RemoveAccountButton_Click(object? sender, EventArgs e)
+        {
+            string selected = accountsListBox.SelectedItem?.ToString() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(selected))
+            {
+                return;
+            }
+
+            if (MessageBox.Show(this, "Remove " + selected + "?", "Confirm remove", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            accountUsernames.RemoveAll(value => string.Equals(value, selected, StringComparison.OrdinalIgnoreCase));
+            AccountStore.SaveUsernames(accountUsernames);
+            RefreshAccountsList();
+        }
+
+        private void LaunchInstanceButton_Click(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (MultiInstanceManager.IsRobloxRunning())
+                {
+                    DialogResult confirm = MessageBox.Show(this, "Roblox is already running. Launch another instance anyway?", "Confirm launch", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (confirm != DialogResult.Yes)
+                    {
+                        return;
+                    }
+                }
+
+                MultiInstanceManager.LaunchRoblox();
+                MessageBox.Show(this, "Roblox launched.", "DiegoStrap", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "DiegoStrap", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void MultiInstanceButton_Click(object? sender, EventArgs e)
+        {
+            using (OpenFileDialog dialog = new OpenFileDialog())
+            {
+                dialog.Title = "Select RobloxPlayerBeta.exe";
+                dialog.Filter = "RobloxPlayerBeta.exe|RobloxPlayerBeta.exe|Executable files (*.exe)|*.exe|All files (*.*)|*.*";
+                dialog.CheckFileExists = true;
+                dialog.CheckPathExists = true;
+                dialog.FileName = "RobloxPlayerBeta.exe";
+
+                if (dialog.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+
+                string fileName = Path.GetFileName(dialog.FileName);
+                if (!string.Equals(fileName, "RobloxPlayerBeta.exe", StringComparison.OrdinalIgnoreCase))
+                {
+                    MessageBox.Show(this, "Select RobloxPlayerBeta.exe.", "DiegoStrap", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                MultiInstanceManager.SaveRobloxPlayerPath(dialog.FileName);
+                multiInstancePathLabel.Text = BuildRobloxPathLabel();
+                MessageBox.Show(this, "RobloxPlayerBeta.exe saved.", "DiegoStrap", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void RegisterProtocolButton_Click(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (protocolRegistrar.IsOwnedByAnotherApp(out string? owner))
+                {
+                    DialogResult result = MessageBox.Show(this, "Another app owns the Roblox protocol: " + (owner ?? "Unknown") + ". Replace it?", "Confirm overwrite", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    if (result != DialogResult.Yes)
+                    {
+                        return;
+                    }
+                }
+
+                protocolRegistrar.RegisterProtocols();
+                protocolStatusLabel.Text = protocolRegistrar.GetStatus();
+                MessageBox.Show(this, "Protocol handlers registered.", "DiegoStrap", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "DiegoStrap", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                ClearProtocolButtonFocus();
+            }
+        }
+
+        private void RestoreOfficialButton_Click(object? sender, EventArgs e)
+        {
+            try
+            {
+                protocolRegistrar.RestoreDefaultRobloxHandler();
+                protocolStatusLabel.Text = protocolRegistrar.GetStatus();
+                MessageBox.Show(this, "Roblox handler restored.", "DiegoStrap", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "DiegoStrap", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                ClearProtocolButtonFocus();
+            }
+        }
+
+        private void UnregisterProtocolButton_Click(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (MessageBox.Show(this, "Remove the protocol handlers registered by this app?", "Confirm removal", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                {
+                    return;
+                }
+
+                protocolRegistrar.UnregisterProtocols();
+                protocolStatusLabel.Text = protocolRegistrar.GetStatus();
+                MessageBox.Show(this, "Protocol handlers removed.", "DiegoStrap", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "DiegoStrap", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                ClearProtocolButtonFocus();
+            }
+        }
+
+        private void VerifyProtocolButton_Click(object? sender, EventArgs e)
+        {
+            RefreshProtocolStatus();
+            MessageBox.Show(this, protocolStatusLabel.Text, "DiegoStrap", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ClearProtocolButtonFocus();
+        }
+
         private void UpdateProgress(DownloadProgressInfo info)
         {
             int percent = info.Percent;
@@ -302,6 +675,86 @@ namespace DiegoStrap
             bool useHash = versionHashRadioButton.Checked;
             versionSourceComboBox.Enabled = !useHash;
             versionHashTextBox.Enabled = useHash;
+        }
+
+        private void RefreshAccountsList()
+        {
+            accountsListBox.Items.Clear();
+            for (int i = 0; i < accountUsernames.Count; i++)
+            {
+                accountsListBox.Items.Add(accountUsernames[i]);
+            }
+        }
+
+        private void RefreshProtocolStatus()
+        {
+            protocolStatusLabel.Text = protocolRegistrar.GetStatus();
+        }
+
+        private void ClearProtocolButtonFocus()
+        {
+            BeginInvoke(new Action(() => ActiveControl = mainTabs));
+        }
+
+        private static string BuildRobloxPathLabel()
+        {
+            string path = MultiInstanceManager.LoadSavedRobloxPlayerPath();
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return "No RobloxPlayerBeta.exe saved yet.";
+            }
+
+            return "Saved path: " + path;
+        }
+
+        private bool TryGetStartupProtocolUri(out string protocolUri)
+        {
+            protocolUri = string.Empty;
+
+            for (int i = 0; i < startupArgs.Length; i++)
+            {
+                string argument = startupArgs[i] ?? string.Empty;
+                if (argument.StartsWith("roblox://", StringComparison.OrdinalIgnoreCase) || argument.StartsWith("roblox-player://", StringComparison.OrdinalIgnoreCase))
+                {
+                    protocolUri = argument;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void HandleProtocolLaunch(string protocolUri)
+        {
+            string robloxPlayerPath = RobloxLocator.ResolveExecutable();
+            if (string.IsNullOrWhiteSpace(robloxPlayerPath))
+            {
+                MessageBox.Show(this, "RobloxPlayerBeta.exe was not found. Install Roblox before launching a protocol.", "DiegoStrap", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = robloxPlayerPath,
+                Arguments = "\"" + protocolUri + "\"",
+                WorkingDirectory = Path.GetDirectoryName(robloxPlayerPath) ?? string.Empty,
+                UseShellExecute = false
+            };
+
+            Process.Start(startInfo);
+        }
+
+        private bool HasUserName(string userName)
+        {
+            for (int i = 0; i < accountUsernames.Count; i++)
+            {
+                if (string.Equals(accountUsernames[i], userName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static VersionSource ParseVersionSource(string? value)
