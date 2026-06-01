@@ -14,7 +14,6 @@ namespace DiegoStrap
     {
         private const string HostPath = "https://setup-aws.rbxcdn.com";
         private const string WEAOApiBase = "https://weao.xyz/api/versions/";
-        private const string LauncherUrl = "https://curly-shape-1578.vnnaworks.workers.dev/";
         private const double BytesPerMegabyte = 1024d * 1024d;
 
         private static readonly HttpClient Http = CreateHttpClient();
@@ -86,15 +85,6 @@ namespace DiegoStrap
 
                     await AddPackageToArchiveAsync(outputArchive, packageBytes, packageName, extractionRoot, cancellationToken).ConfigureAwait(false);
                 }
-
-                progress?.Report(new DownloadProgressInfo
-                {
-                    Percent = 95,
-                    StatusText = "Downloading launcher..."
-                });
-
-                byte[] launcherBytes = await DownloadBytesAsync(LauncherUrl, cancellationToken, progress, "Launcher", packages.Count + 1, packages.Count + 1).ConfigureAwait(false);
-                AddFileToArchive(outputArchive, "weblauncher.exe", launcherBytes);
             }
 
             progress?.Report(new DownloadProgressInfo

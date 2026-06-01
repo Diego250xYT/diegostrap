@@ -213,7 +213,7 @@ namespace DiegoStrap
                 WindowsDownloader downloader = new WindowsDownloader();
                 IProgress<DownloadProgressInfo> reporter = new Progress<DownloadProgressInfo>(UpdateProgress);
                 string resolvedVersion = await downloader.DownloadAsync(request, tempOutputPath, CancellationToken.None, reporter).ConfigureAwait(true);
-                string finalFileName = "WEAO-" + "LIVE" + "-" + (binaryTypeComboBox.SelectedItem?.ToString() ?? "WindowsPlayer") + "-" + resolvedVersion + ".zip";
+                string finalFileName = resolvedVersion + ".zip";
                 string finalOutputPath = System.IO.Path.Combine(outputDirectory, finalFileName);
 
                 if (System.IO.File.Exists(finalOutputPath))
