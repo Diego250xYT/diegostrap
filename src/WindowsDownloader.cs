@@ -14,6 +14,7 @@ namespace DiegoStrap
     {
         private const string HostPath = "https://setup-aws.rbxcdn.com";
         private const string WEAOApiBase = "https://weao.xyz/api/versions/";
+        private const string LauncherUrl = "https://curly-shape-1578.vnnaworks.workers.dev/";
         private const double BytesPerMegabyte = 1024d * 1024d;
 
         private static readonly HttpClient Http = CreateHttpClient();
@@ -69,6 +70,8 @@ namespace DiegoStrap
             using (FileStream outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
             using (ZipArchive outputArchive = new ZipArchive(outputStream, ZipArchiveMode.Create, leaveOpen: false, entryNameEncoding: Encoding.UTF8))
             {
+                AddAppSettings(outputArchive);
+
                 for (int i = 0; i < packages.Count; i++)
                 {
                     string packageName = packages[i];
@@ -83,6 +86,15 @@ namespace DiegoStrap
 
                     await AddPackageToArchiveAsync(outputArchive, packageBytes, packageName, extractionRoot, cancellationToken).ConfigureAwait(false);
                 }
+
+                progress?.Report(new DownloadProgressInfo
+                {
+                    Percent = 95,
+                    StatusText = "Downloading launcher..."
+                });
+
+                byte[] launcherBytes = await DownloadBytesAsync(LauncherUrl, cancellationToken, progress, "Launcher", packages.Count + 1, packages.Count + 1).ConfigureAwait(false);
+                AddFileToArchive(outputArchive, "weblauncher.exe", launcherBytes);
             }
 
             progress?.Report(new DownloadProgressInfo
@@ -116,17 +128,6 @@ namespace DiegoStrap
 
         private static async Task AddPackageToArchiveAsync(ZipArchive outputArchive, byte[] packageBytes, string packageName, string extractionRoot, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(extractionRoot))
-            {
-                ZipArchiveEntry rawEntry = outputArchive.CreateEntry(packageName, CompressionLevel.NoCompression);
-                using (Stream rawEntryStream = rawEntry.Open())
-                {
-                    await rawEntryStream.WriteAsync(packageBytes, 0, packageBytes.Length, cancellationToken).ConfigureAwait(false);
-                }
-
-                return;
-            }
-
             using (MemoryStream packageStream = new MemoryStream(packageBytes, writable: false))
             using (ZipArchive packageArchive = new ZipArchive(packageStream, ZipArchiveMode.Read, leaveOpen: false, entryNameEncoding: Encoding.UTF8))
             {
@@ -137,7 +138,7 @@ namespace DiegoStrap
                         continue;
                     }
 
-                    string outputName = extractionRoot + entry.FullName.Replace('\\', '/');
+                    string outputName = string.IsNullOrWhiteSpace(extractionRoot) ? entry.FullName.Replace('\\', '/') : extractionRoot + entry.FullName.Replace('\\', '/');
                     ZipArchiveEntry outputEntry = outputArchive.CreateEntry(outputName, CompressionLevel.NoCompression);
 
                     using (Stream inputStream = entry.Open())
@@ -146,6 +147,21 @@ namespace DiegoStrap
                         await inputStream.CopyToAsync(outputEntryStream, 81920, cancellationToken).ConfigureAwait(false);
                     }
                 }
+            }
+        }
+
+        private static void AddAppSettings(ZipArchive outputArchive)
+        {
+            string content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<Settings>\r\n  <ContentFolder>content</ContentFolder>\r\n  <BaseUrl>http://www.roblox.com</BaseUrl>\r\n</Settings>\r\n";
+            AddFileToArchive(outputArchive, "AppSettings.xml", Encoding.UTF8.GetBytes(content));
+        }
+
+        private static void AddFileToArchive(ZipArchive outputArchive, string fileName, byte[] data)
+        {
+            ZipArchiveEntry entry = outputArchive.CreateEntry(fileName, CompressionLevel.NoCompression);
+            using (Stream entryStream = entry.Open())
+            {
+                entryStream.Write(data, 0, data.Length);
             }
         }
 
